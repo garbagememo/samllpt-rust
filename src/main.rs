@@ -276,7 +276,7 @@ fn main() {
                             + cy * ((((sy as f64) + 0.5 + dy) / 2.0 + ((h-y) as f64)) / (h as f64) - 0.5) + cam.d;
                         r = r + radiance(&(Ray::new(cam.o + d * 140.0, d.norm())), 0) * (1.0 / (samps as f64));
                     }
-                    band[x as usize] = band[x as usize] + r*(1.0/9.0 as f64);
+                    band[x as usize] = band[x as usize] + r*(1.0/4.0 as f64);
                 }
             }
         }
