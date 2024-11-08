@@ -156,7 +156,7 @@ fn to_int(x: f64) -> u8 {
 fn save_ppm_file(filename: &str, image: Vec<Color>, width: usize, height: usize) {
     let mut f = fs::File::create(filename).unwrap();
     writeln!(f, "P3\n{} {}\n{}", width, height, 255).unwrap();
-    for i in 0..(width * height) {
+    for i in 0..(width * (height)) {
         write!(f, "{} {} {} ", to_int(image[i as usize].x), to_int(image[i as usize].y), to_int(image[i as usize].z)).unwrap();
     }
 }
@@ -251,32 +251,34 @@ fn radiance(r: &Ray, depth: u8) -> Vec3 {
 }
 
 fn main() {
-    let w:usize = 1024;
-    let h:usize = 576;
+    let w:usize = 640;
+    let h:usize = 480;
     let samps = if std::env::args().len() == 2 { std::env::args().skip(1).next().unwrap().parse().unwrap() } else { 1 };
     let cam = Ray::new(Vec3::new(50.0, 52.0, 295.6), Vec3::new(0.0, -0.042612, -1.0).norm());
 
     let cx = Vec3::new((w as f64) * 0.5135 / (h as f64), 0.0, 0.0);
     let cy = (cx % cam.d).norm() * 0.5135;
-    let mut image = vec![Color::zero(); (w * h) as usize];
+    let mut image = vec![Color::zero(); (w * h ) as usize];
 
     let bands: Vec<(usize, &mut [Color])> = image.chunks_mut(w as usize).enumerate().collect();
     bands.into_par_iter().for_each(|(y, band)| {
-        if (y % samps)==0 {writeln!(std::io::stderr(), "Rendering ({} spp) {:5.2}%", samps * 4, 100.0 * (y as f64) / ((h as f64) - 1.0)).unwrap();}
+        let y = h - (y as usize)-1;
+		if (y % 10)==0 {writeln!(std::io::stderr(), "Rendering ({} spp) {:5.2}%", samps * 4, 100.0 * (y as f64) / ((h as f64) - 1.0)).unwrap();}
         for x in 0..w {
             let mut r = Vec3::zero();
             for sy in 0..2 {
                 for sx in 0..2 {
-                    for _s in 0..samps-1 {
+                    for _s in 0..samps {
                         let r1 = 2.0 * random();
                         let dx = if r1 < 1.0 { r1.sqrt() - 1.0 } else { 1.0 - (2.0 - r1).sqrt() };
                         let r2 = 2.0 * random();
                         let dy = if r2 < 1.0 { r2.sqrt() - 1.0 } else { 1.0 - (2.0 - r2).sqrt() }; 
                         let d = cx * ((((sx as f64) + 0.5 + dx) / 2.0 + (x as f64)) / (w as f64) - 0.5)
-                            + cy * ((((sy as f64) + 0.5 + dy) / 2.0 + ((h-y) as f64)) / (h as f64) - 0.5) + cam.d;
+                              + cy * ((((sy as f64) + 0.5 + dy) / 2.0 + (y as f64)) / (h as f64) - 0.5) + cam.d;
                         r = r + radiance(&(Ray::new(cam.o + d * 140.0, d.norm())), 0) * (1.0 / (samps as f64));
                     }
                     band[x as usize] = band[x as usize] + r*(1.0/4.0 as f64);
+					r=Vec3::zero();
                 }
             }
         }
