@@ -5,6 +5,8 @@ use std::io::Write;
 use std::fs;
 use rayon::prelude::*;
 
+const EPS:f64=1.0e-4;
+const INF:f64=1.0e20;
 
 fn random() -> f64 {
     rand::random::<f64>()
@@ -104,38 +106,37 @@ type Color = Vec3;
 impl Sphere {
     fn intersect(&self, r: &Ray) -> f64 {
         let op = self.p - r.o;
-        let eps = 1e-4;
         let b = op.dot(&r.d);
         let mut det = b * b - op.dot(&op) + self.rad * self.rad;
         if det < 0.0 {
-            return 0.0;
+            return INF;
         }
         det = det.sqrt();
         let t = b - det;
-        if t > eps {
+        if t > EPS {
             return t;
         }
         let t = b + det;
-        if t > eps {
+        if t > EPS {
             return t;
         } else {
-            0.0
+            return INF;
         }
     }
 }
 
 lazy_static! {
     static ref SPHERES: [Sphere; 9] = [
-        Sphere { rad: 1e5, p: Vec3::new(1e5 + 1.0, 40.8, 81.6), e: Vec3::zero(), c: Vec3::new(0.75, 0.25, 0.25), refl: Refl::Diff },
-        Sphere { rad: 1e5, p: Vec3::new(-1e5 + 99.0, 40.8, 81.6), e: Vec3::zero(), c: Vec3::new(0.25, 0.25, 0.75), refl: Refl::Diff },
-        Sphere { rad: 1e5, p: Vec3::new(50.0, 40.8, 1e5), e: Vec3::zero(), c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },
-        Sphere { rad: 1e5, p: Vec3::new(50.0, 40.8, -1e5 + 170.0), e: Vec3::zero(), c: Vec3::zero(), refl: Refl::Diff },
-        Sphere { rad: 1e5, p: Vec3::new(50.0, 1e5, 81.6), e: Vec3::zero(), c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },
-        Sphere { rad: 1e5, p: Vec3::new(50.0, -1e5 + 81.6, 81.6), e: Vec3::zero(), c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },
-        Sphere { rad: 16.5, p: Vec3::new(27.0, 16.5, 47.0), e: Vec3::zero(), c: Vec3::new(1.0, 1.0, 1.0) * 0.999, refl: Refl::Spec },
-        Sphere { rad: 16.5, p: Vec3::new(73.0, 16.5, 78.0), e: Vec3::zero(), c: Vec3::new(1.0, 1.0, 1.0) * 0.999, refl: Refl::Refr },
-        Sphere { rad: 600.0, p: Vec3::new(50.0, 681.6 - 0.27, 81.6), e: Vec3::new(12.0, 12.0, 12.0), c: Vec3::zero(), refl: Refl::Diff },
-    ];
+        Sphere { rad: 1e5,   p: Vec3::new(1e5 + 1.0,      40.8, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.25, 0.25), refl: Refl::Diff },
+        Sphere { rad: 1e5,   p: Vec3::new(-1e5 + 99.0,    40.8, 81.6),e: Vec3::zero(),                c: Vec3::new(0.25, 0.25, 0.75), refl: Refl::Diff },
+        Sphere { rad: 1e5,   p: Vec3::new(50.0,           40.8, 1e5), e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },
+        Sphere { rad: 1e5,   p: Vec3::new(50.0,           40.8,-1e5 + 170.0),e: Vec3::zero(),         c: Vec3::zero(), refl: Refl::Diff },
+        Sphere { rad: 1e5,   p: Vec3::new(50.0,            1e5, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },
+        Sphere { rad: 1e5,   p: Vec3::new(50.0,-1e5 + 81.6+1.0, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },
+        Sphere { rad: 16.5,  p: Vec3::new(27.0,           16.5, 47.0),e: Vec3::zero(),                c: Vec3::new(1.0, 1.0, 1.0) * 0.999, refl: Refl::Spec },
+        Sphere { rad: 16.5,  p: Vec3::new(73.0,           16.5, 78.0),e: Vec3::zero(),                c: Vec3::new(1.0, 1.0, 1.0) * 0.999, refl: Refl::Refr },
+        Sphere { rad: 600.0, p: Vec3::new(50.0, 681.6-0.27+1.0, 81.6),e: Vec3::new(12.0, 12.0, 12.0), c: Vec3::zero(), refl: Refl::Diff },
+	];
 }
 
 fn clamp(x: f64) -> f64 {
@@ -164,16 +165,15 @@ fn save_ppm_file(filename: &str, image: Vec<Color>, width: usize, height: usize)
 
 fn intersect(r: &Ray, t: &mut f64, id: &mut usize) -> bool {
     let n = SPHERES.len();
-    let inf: f64 = 1e20;
-    *t = inf;
+    *t = INF;
     for i in (0..n).rev() {
         let d = SPHERES[i].intersect(r);
-        if d != 0.0 && d < *t {
+        if d < *t {
             *t = d;
             *id = i;
         }
     }
-    return *t < inf;
+    return *t < INF;
 }
 
 fn radiance(r: &Ray, depth: u8) -> Vec3 {
@@ -262,7 +262,7 @@ fn main() {
 
     let bands: Vec<(usize, &mut [Color])> = image.chunks_mut(w as usize).enumerate().collect();
     bands.into_par_iter().for_each(|(y, band)| {
-        let y = h - (y as usize)-1;
+        let y2 = h - (y as usize)-1;
 		if (y % 10)==0 {writeln!(std::io::stderr(), "Rendering ({} spp) {:5.2}%", samps * 4, 100.0 * (y as f64) / ((h as f64) - 1.0)).unwrap();}
         for x in 0..w {
             let mut r = Vec3::zero();
@@ -274,7 +274,7 @@ fn main() {
                         let r2 = 2.0 * random();
                         let dy = if r2 < 1.0 { r2.sqrt() - 1.0 } else { 1.0 - (2.0 - r2).sqrt() }; 
                         let d = cx * ((((sx as f64) + 0.5 + dx) / 2.0 + (x as f64)) / (w as f64) - 0.5)
-                              + cy * ((((sy as f64) + 0.5 + dy) / 2.0 + (y as f64)) / (h as f64) - 0.5) + cam.d;
+                              + cy * ((((sy as f64) + 0.5 + dy) / 2.0 + (y2 as f64)) / (h as f64) - 0.5) + cam.d;
                         r = r + radiance(&(Ray::new(cam.o + d * 140.0, d.norm())), 0) * (1.0 / (samps as f64));
                     }
                     band[x as usize] = band[x as usize] + r*(1.0/4.0 as f64);
