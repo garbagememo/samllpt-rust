@@ -88,48 +88,62 @@ lazy_static! {
 
   //-------------Vista sc5------------
 
-  Cen:=Vec3::new(50,-20,-860},
+const  Cen:Vec3=Vec3{x:50.0,y:-20.0,z:-860.0};
 
-  Sphere { rad:8000, Cen+Vec3::new(0,-8000,-900.0),Vec3::new(1,0.4,0.1)*5e-1, Vec3::zero(),  refl: Refl::Diff}, // sun
-  Sphere { rad:1e4,  Cen+Vec3::zero(), Vec3::new(0.631, 0.753, 1.00)*3e-1, Vec3::new(1.0,1.0,1.0)*0.5,  refl: Refl::Diff}, // sky
 
-  Sphere { rad:150,  Cen+Vec3::new(-350,0, -100.0),Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.3,  refl: Refl::Diff}, // mnt
-  Sphere { rad:200,  Cen+Vec3::new(-210,0,-100.0), Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.3,  refl: Refl::Diff}, // mnt
-  Sphere { rad:145,  Cen+Vec3::new(-210,85,-100.0),Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff}, // snow
-  Sphere { rad:150,  Cen+Vec3::new(-50,0,-100.0),  Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.3,  refl: Refl::Diff}, // mnt
-  Sphere { rad:150,  Cen+Vec3::new(100,0,-100.0),  Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.3,  refl: Refl::Diff}, // mnt
-  Sphere { rad:125,  Cen+Vec3::new(250,0,-100.0),  Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.3,  refl: Refl::Diff}, // mnt
-  Sphere { rad:150,  Cen+Vec3::new(375,0,-100.0),  Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.3,  refl: Refl::Diff}, // mnt
+lazy_static! {
+	static ref SPHERES: [Sphere;24] = [
 
-  Sphere { rad:2500, Cen+Vec3::new(0,-2400,-500.0),Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.1,  refl: Refl::Diff}, // mnt base
 
-  Sphere { rad:8000, Cen+Vec3::new(0,-8000,200.0), Vec3::zero(),  Vec3::new(0.2,0.2,1),    refl: Refl::Refr)}, // water
-  Sphere { rad:8000, Cen+Vec3::new(0,-8000,1100.0),Vec3::zero(),  Vec3::new(0,0.3,0.0),     refl: Refl::Diff}, // grass
-  Sphere { rad:8   , Cen+Vec3::new(-75, -5, 850.0),Vec3::zero(),  Vec3::new(0,0.3,0.0),     refl: Refl::Diff}, // bush
-  Sphere { rad:30,   Cen+Vec3::new(0,   23, 825),Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.996, refl: Refl::Refr)}, // ball
+  Sphere { rad:8000.0, p:Cen+Vec3::new(0.0,-8000.0,-900.0),e:Vec3::new(1.0,0.4,0.1)*5e-1,        c:Vec3::zero(),  refl: Refl::Diff}, // sun
+  Sphere { rad:1e4,    p:Cen+Vec3::zero(),                 e:Vec3::new(0.631, 0.753, 1.00)*3e-1, c:Vec3::new(1.0,1.0,1.0)*0.5,  refl: Refl::Diff}, // sky
 
-  Sphere { rad:30,  Cen+Vec3::new(200,280,-400.0),  Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},   // clouds
-  Sphere { rad:37,  Cen+Vec3::new(237,280,-400.0),  Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},   // clouds
-  Sphere { rad:28,  Cen+Vec3::new(267,280,-400.0),  Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},   // clouds
+  Sphere { rad:150.0,  p:Cen+Vec3::new(-350.0, 0.0,-100.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.3,  refl: Refl::Diff}, // mnt
+  Sphere { rad:200.0,  p:Cen+Vec3::new(-210.0, 0.0,-100.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.3,  refl: Refl::Diff}, // mnt
+  Sphere { rad:145.0,  p:Cen+Vec3::new(-210.0,85.0,-100.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff}, // snow
+  Sphere { rad:150.0,  p:Cen+Vec3::new(-50.0,  0.0,-100.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.3,  refl: Refl::Diff}, // mnt
+  Sphere { rad:150.0,  p:Cen+Vec3::new(100.0,  0.0,-100.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.3,  refl: Refl::Diff}, // mnt
+  Sphere { rad:125.0,  p:Cen+Vec3::new(250.0,  0.0,-100.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.3,  refl: Refl::Diff}, // mnt
+  Sphere { rad:150.0,  p:Cen+Vec3::new(375.0,  0.0,-100.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.3,  refl: Refl::Diff}, // mnt
 
-  Sphere { rad:40,  Cen+Vec3::new(150,280,-1000.0),  Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},  // clouds
-  Sphere { rad:37,  Cen+Vec3::new(187,280,-1000.0),  Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},  // clouds
+  Sphere { rad:2500.0, p:Cen+Vec3::new(0.0,-2400.0,-500.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.1,  refl: Refl::Diff}, // mnt base
 
-  Sphere { rad:40,  Cen+Vec3::new(600,280,-1100.0),  Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},  // clouds
-  Sphere { rad:37,  Cen+Vec3::new(637,280,-1100.0),  Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},  // clouds
+  Sphere { rad:8000.0, p:Cen+Vec3::new(0.0,-8000.0, 200.0), e:Vec3::zero(),                       c:Vec3::new(0.2,0.2,1.0),    refl: Refl::Refr}, // water
+  Sphere { rad:8000.0, p:Cen+Vec3::new(0.0,-8000.0,1100.0), e:Vec3::zero(),                       c:Vec3::new(0.0,0.3,0.0),   refl: Refl::Diff}, // grass
+  Sphere { rad:8.0   , p:Cen+Vec3::new(-75.0, -5.0, 850.0), e:Vec3::zero(),                       c:Vec3::new(0.0,0.3,0.0),     refl: Refl::Diff}, // bush
+  Sphere { rad:30.0,   p:Cen+Vec3::new(0.0,   23.0, 825.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.996, refl: Refl::Refr}, // ball
 
-  Sphere { rad:37,  Cen+Vec3::new(-800,280,-1400.0),  Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff}, // clouds
-  Sphere { rad:37,  Cen+Vec3::new(0,280,-1600.0),  Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},    // clouds
-  Sphere { rad:37,  Cen+Vec3::new(537,280,-1800.0),  Vec3::zero(),  Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},  // clouds
+  Sphere { rad:30.0,   p:Cen+Vec3::new(200.0,280.0,-400.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},   // clouds
+  Sphere { rad:37.0,   p:Cen+Vec3::new(237.0,280.0,-400.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},   // clouds
+  Sphere { rad:28.0,   p:Cen+Vec3::new(267.0,280.0,-400.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},   // clouds
+
+  Sphere { rad:40.0,   p:Cen+Vec3::new(150.0,280.0,-1000.0),e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},  // clouds
+  Sphere { rad:37.0,   p:Cen+Vec3::new(187.0,280.0,-1000.0),e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},  // clouds
+
+  Sphere { rad:40.0,   p:Cen+Vec3::new(600.0,280.0,-1100.0),e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},  // clouds
+  Sphere { rad:37.0,   p:Cen+Vec3::new(637.0,280.0,-1100.0),e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},  // clouds
+
+  Sphere { rad:37.0, p:Cen+Vec3::new(-800.0,280.0,-1400.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff}, // clouds
+  Sphere { rad:37.0, p:Cen+Vec3::new(0.0,   280.0,-1600.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},    // clouds
+  Sphere { rad:37.0, p:Cen+Vec3::new(537.0, 280.0,-1800.0), e:Vec3::zero(),                       c:Vec3::new(1.0,1.0,1.0)*0.8,  refl: Refl::Diff},  // clouds
+	];
+}
+
 
 
 //----------------Overlap  sc6-----------------
 
-D:=50;
-R:=40;
-  Sphere { rad:150, Vec3::new(50+75,28,62), Vec3::new(1.0,1.0,1.0)*0e-3, Vec3::new(1,0.9,0.8)*0.93, refl: Refl::Refr)},
-  Sphere { rad:28,  Vec3::new(50+5,-28,62), Vec3::new(1.0,1.0,1.0)*1e1, Vec3::zero(), refl: Refl::Diff},
-  Sphere { rad:300, Vec3::new(50,28,62), Vec3::new(1.0,1.0,1.0)*0e-3, Vec3::new(1.0,1.0,1.0)*0.93, refl: Refl::Spec)},
+const D:f64=50.0;
+const R:f64=40.0;
+
+lazy_static! {
+	static ref SPHERES: [Sphere;3] = [
+
+  Sphere { rad:150.0, p:Vec3::new(50.0+75.0,28.0,62.0), e:Vec3::new(1.0,1.0,1.0)*0e-3, c:Vec3::new(1.0,0.9,0.8)*0.93, refl: Refl::Refr},
+  Sphere { rad:28.0,  p:Vec3::new(50.0+5.0,-28.0,62.0), e:Vec3::new(1.0,1.0,1.0)*1e1,  c:Vec3::zero(), refl: Refl::Diff},
+  Sphere { rad:300.0, p:Vec3::new(50.0,     28.0,62.0), e:Vec3::new(1.0,1.0,1.0)*0e-3, c:Vec3::new(1.0,1.0,1.0)*0.93, refl: Refl::Spec},
+	];
+}
 
 
   //----------------wada  sc7-------------
