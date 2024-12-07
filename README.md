@@ -1,5 +1,5 @@
 よそからパクって来たsmallptのrust版。オリジナルと同じく画像の上に白い線が入ってしまう。  
 これはスクリーン平面が天井より上に一部出ているから、を確認しました。  
 モデルをちょっといじる方が良いとしか思えないので、ソースは修正しましたが・・・  
-[(https://github.com/garbagememo/samllpt-rust/blob/main/image.png)]  
+![オリジナルの白線の出る出力画像](https://github.com/garbagememo/samllpt-rust/blob/main/image.png)]  
 あと、rayonでスレッド対応としてます
