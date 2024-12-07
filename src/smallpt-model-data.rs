@@ -22,7 +22,7 @@ lazy_static! {
         Sphere { rad: 1e5,  p: Vec3::new(1e5 + 1.0,      40.8, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.25, 0.25), refl: Refl::Diff },
         Sphere { rad: 1e5,  p: Vec3::new(-1e5 + 99.0,    40.8, 81.6),e: Vec3::zero(),                c: Vec3::new(0.25, 0.25, 0.75), refl: Refl::Diff },
         Sphere { rad: 1e5,  p: Vec3::new(50.0,           40.8, 1e5 ),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },
-        Sphere { rad: 1e5,  p: Vec3::new(50.0,    40.8,-1e5 + 170.0),e: Vec3::zero(),         c: Vec3::zero(), refl: Refl::Diff },
+        Sphere { rad: 1e5,  p: Vec3::new(50.0,           40.8,-1e5 + 170.0),e: Vec3::zero(),         c: Vec3::zero(), refl: Refl::Diff },
         Sphere { rad: 1e5,  p: Vec3::new(50.0,            1e5, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },
         Sphere { rad: 1e5,  p: Vec3::new(50.0,-1e5 + 81.6+4.0, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },
         Sphere { rad: 16.5, p: Vec3::new(27.0,           16.5, 47.0),e: Vec3::zero(),                c: Vec3::new(1.0, 1.0, 1.0) * 0.999, refl: Refl::Spec },
@@ -37,7 +37,10 @@ lazy_static! {
     static ref SPHERES: [Sphere; 9] = [
 		Sphere { rad:1600.0, p:Vec3::new(1.0,0.0,2.0)*3000.0, e:Vec3::new(1.0,0.9,0.8)*1.2e1*1.56*2.0,  c:Vec3::zero(), refl: Refl::Diff}, // sun
 		Sphere { rad:1560.0, p:Vec3::new(1.0,0.0,2.0)*3500.0, e:Vec3::new(1.0,0.5,0.05)*4.8e1*1.56*2.0, c:Vec3::zero(), refl: Refl::Diff}, // horizon sun2
-        Sphere { rad:10000.0,p:Cen+Vec3::new(0.0,0.0,-200.0), e:Vec3::new(0.00063842, 0.02001478, 0.28923243)*6e-2*8.0, c:Vec3::new(0.7,0.7,1.0)*0.25,  refl: Refl::Diff}, // sky
+        Sphere { rad:10000.0,
+				 p:Cen+Vec3::new(0.0,0.0,-200.0),
+				 e:Vec3::new(0.00063842, 0.02001478, 0.28923243)*6e-2*8.0,
+				 c:Vec3::new(0.7,0.7,1.0)*0.25,  refl: Refl::Diff}, // sky
 
 		Sphere { rad:100000.0,p:Vec3::new(50.0,-100000.0,0.0),e:Vec3::zero(),				c:Vec3::new(0.3,0.3,0.3),refl: Refl::Diff}, // grnd
 		Sphere { rad:110000.0,p:Vec3::new(50.0,-110048.5,0.0),e:Vec3::new(0.9,0.5,0.05)*4.0,c:Vec3::zero(),refl: Refl::Diff},// horizon brightener
@@ -148,57 +151,82 @@ lazy_static! {
 
   //----------------wada  sc7-------------
 
-R:=60;
-//double R=120;
-T:=30*PI/180.;
-D:=R/cos(T},
-Z:=60;
+const SQRT_3: f64 = 1.732050807568877293527446341505872367_f64;
+const R:f64=60.0;
+const T:f64=FRAC_PI_6;//30.0*PI/180.0;
+const D:f64=R/(SQRT_3/2.0) ;//cos(T);
+const Z:f64=60.0;
+lazy_static! {
+	static ref SPHERES: [Sphere;7] = [
 
-  Sphere { rad:1e5, Vec3::new(50, 100, 0.0),      Vec3::new(1.0,1.0,1.0)*3e0, Vec3::zero(), refl: Refl::Diff}, // sky
-  Sphere { rad:1e5, Vec3::new(50, -1e5-D-R, 0.0), Vec3::zero(),     Vec3::new(0.1,0.1,0.1),refl: Refl::Diff},           //grnd
+  Sphere { rad:1e5, p:Vec3::new(50.0, 100.0, 0.0),      e:Vec3::new(1.0,1.0,1.0)*3e0, c:Vec3::zero(), refl: Refl::Diff}, // sky
+  Sphere { rad:1e5, p:Vec3::new(50.0, -1e5-D-R, 0.0),   e:Vec3::zero(),               c:Vec3::new(0.1,0.1,0.1),refl: Refl::Diff},           //grnd
 
-  Sphere { rad:R, Vec3::new(50,40.8,62)+Vec3::new( cos(T),sin(T),0)*D, Vec3::zero(), Vec3::new(1,0.3,0.3)*0.999, refl: Refl::Spec)}, //red
-  Sphere { rad:R, Vec3::new(50,40.8,62)+Vec3::new(-cos(T),sin(T),0)*D, Vec3::zero(), Vec3::new(0.3,1,0.3)*0.999, refl: Refl::Spec)}, //grn
-  Sphere { rad:R, Vec3::new(50,40.8,62)+Vec3::new(0,-1,0)*D,         Vec3::zero(), Vec3::new(0.3,0.3,1)*0.999, refl: Refl::Spec)}, //blue
-  Sphere { rad:R, Vec3::new(50,40.8,62)+Vec3::new(0,0,-1)*D,       Vec3::zero(), Vec3::new(0.53,0.53,0.53)*0.999, refl: Refl::Spec)}, //back
-  Sphere { rad:R, Vec3::new(50,40.8,62)+Vec3::new(0,0,1)*D,      Vec3::zero(), Vec3::new(1.0,1.0,1.0)*0.999, refl: Refl::Refr)}, //front
-
+  Sphere { rad:R, p:Vec3::new(50.0,40.8,62.0)+Vec3::new( T.cos(),T.sin(),0.0)*D, e:Vec3::zero(), c:Vec3::new(1.0,0.3,0.3)*0.999, refl: Refl::Spec}, //red
+  Sphere { rad:R, p:Vec3::new(50.0,40.8,62.0)+Vec3::new(-T.cos(),T.sin(),0.0)*D, e:Vec3::zero(), c:Vec3::new(0.3,1.0,0.3)*0.999, refl: Refl::Spec}, //grn
+  Sphere { rad:R, p:Vec3::new(50.0,40.8,62.0)+Vec3::new(0.0,-1.0,0.0)*D,         e:Vec3::zero(), c:Vec3::new(0.3,0.3,1.0)*0.999, refl: Refl::Spec}, //blue
+  Sphere { rad:R, p:Vec3::new(50.0,40.8,62.0)+Vec3::new(0.0, 0.0,-1.0)*D,        e:Vec3::zero(), c:Vec3::new(0.53,0.53,0.53)*0.999, refl: Refl::Spec}, //back
+  Sphere { rad:R, p:Vec3::new(50.0,40.8,62.0)+Vec3::new(0.0, 0.0, 1.0)*D,        e:Vec3::zero(), c:Vec3::new(1.0,1.0,1.0)*0.999, refl: Refl::Refr}, //front
+	];
+}
 
   //-----------------wada2 sc8----------
 
-R:=120;     // radius
-T:=30*PI/180.;
-D:=R/cos(T},     //distance
-Z:=62;
-C:=Vec3::new(0.275, 0.612, 0.949},
+const SQRT_3: f64 = 1.732050807568877293527446341505872367_f64;
+const R:f64=60.0;
+const T:f64=FRAC_PI_6;//30.0*PI/180.0;
+const D:f64=R/(SQRT_3/2.0) ;//cos(T);
+const Z:f64=62.0;
+const C:Vec3=Vec3{x:0.275,y:0.612,z:0.949};
+lazy_static! {
+	static ref SPHERES: [Sphere;5] = [
 
-  Sphere { rad:R, Vec3::new(50,28,Z)+Vec3::new( cos(T),sin(T),0)*D,    C*6e-2,Vec3::new(1.0,1.0,1.0)*0.996, refl: Refl::Spec)}, //red
-  Sphere { rad:R, Vec3::new(50,28,Z)+Vec3::new(-cos(T),sin(T),0)*D,    C*6e-2,Vec3::new(1.0,1.0,1.0)*0.996, refl: Refl::Spec)}, //grn
-  Sphere { rad:R, Vec3::new(50,28,Z)+Vec3::new(0,-1,0)*D,              C*6e-2,Vec3::new(1.0,1.0,1.0)*0.996, refl: Refl::Spec)}, //blue
-  Sphere { rad:R, Vec3::new(50,28,Z)+Vec3::new(0,0,-1)*R*2*sqrt(2/3),C*0e-2,Vec3::new(1.0,1.0,1.0)*0.996, refl: Refl::Spec)}, //back
-  Sphere { rad:2*2*R*2*sqrt(2/3)-R*2*sqrt(2/3)/3, Vec3::new(50,28,Z)+Vec3::new(0,0,-R*2*sqrt(2/3)/3), Vec3::new(1.0,1.0,1.0)*0,Vec3::new(1.0,1.0,1.0)*0.5, refl: Refl::Spec)}, //front
-
+  Sphere { rad:R, p:Vec3::new(50.0,28.0,Z)+Vec3::new( T.cos(),T.sin(),0.0)*D,           e:C*6e-2, c:Vec3::new(1.0,1.0,1.0)*0.996, refl: Refl::Spec}, //red
+  Sphere { rad:R, p:Vec3::new(50.0,28.0,Z)+Vec3::new(-T.cos(),T.sin(),0.0)*D,           e:C*6e-2, c:Vec3::new(1.0,1.0,1.0)*0.996, refl: Refl::Spec}, //grn
+  Sphere { rad:R, p:Vec3::new(50.0,28.0,Z)+Vec3::new(0.0,-1.0,0.0)*D,                   e:C*6e-2, c:Vec3::new(1.0,1.0,1.0)*0.996, refl: Refl::Spec}, //blue
+  Sphere { rad:R, p:Vec3::new(50.0,28.0,Z)+Vec3::new(0.0, 0.0,-1.0)*R*2.0*f64::sqrt(2.0/3.0), e:C*0e-2, c:Vec3::new(1.0,1.0,1.0)*0.996, refl: Refl::Spec}, //back
+  Sphere { rad:2.0*2.0*R*2.0*f64::sqrt(2.0/3.0)-R*2.0*f64::sqrt(2.0/3.0)/3.0,
+			      p:Vec3::new(50.0,28.0,Z)+Vec3::new(0.0,0.0,-R*2.0*f64::sqrt(2.0/3.0)/3.0),  e:Vec3::new(1.0,1.0,1.0)*0.0,c:Vec3::new(1.0,1.0,1.0)*0.5, refl: Refl::Spec}, //front
+	];
+}
 
 
   //---------------forest sc9-----------
+const tc:Vec3=Vec3{x:0.0588, y:0.361, z:0.0941};
+const scc:Vec3=Vec3{x:0.7,y:0.7,z:0.7};
+lazy_static! {
+	static ref SPHERES: [Sphere;13] = [
 
-tc:=Vec3::new(0.0588, 0.361, 0.0941},
-scc:=Vec3::new(1.0,1.0,1.0)*0.7;
-  Sphere { rad:1e5, Vec3::new(50, 1e5+130, 0.0),  Vec3::new(1.0,1.0,1.0)*1.3,Vec3::zero(),refl: Refl::Diff}, //lite
-  Sphere { rad:1e2, Vec3::new(50, -1e2+2, 47),  Vec3::zero(),Vec3::new(1.0,1.0,1.0)*0.7,refl: Refl::Diff}, //grnd
+  Sphere { rad:1e5, p:Vec3::new(50.0, 1e5+130.0, 0.0),  e:Vec3::new(1.0,1.0,1.0)*1.3,c:Vec3::zero(),refl: Refl::Diff}, //lite
+  Sphere { rad:1e2, p:Vec3::new(50.0, -1e2+2.0, 47.0),  e:Vec3::zero(),              c:Vec3::new(1.0,1.0,1.0)*0.7,refl: Refl::Diff}, //grnd
 
-  Sphere { rad:1e4, Vec3::new(50, -30, 300)+Vec3::new(-sin(50*PI/180.0),0,cos(50*PI/180))*1e4, Vec3::zero(), Vec3::new(1.0,1.0,1.0)*0.99,refl: Refl::Spec)},// mirr L
-  Sphere { rad:1e4, Vec3::new(50, -30, 300)+Vec3::new(sin(50*PI/180.0),0,cos(50*PI/180))*1e4,  Vec3::zero(), Vec3::new(1.0,1.0,1.0)*0.99,refl: Refl::Spec)},// mirr R
-  Sphere { rad:1e4, Vec3::new(50, -30, -50)+Vec3::new(-sin(30*PI/180.0),0,-cos(30*PI/180))*1e4,Vec3::zero(), Vec3::new(1.0,1.0,1.0)*0.99,refl: Refl::Spec)},// mirr FL
-  Sphere { rad:1e4, Vec3::new(50, -30, -50)+Vec3::new(sin(30*PI/180.0),0,-cos(30*PI/180))*1e4, Vec3::zero(), Vec3::new(1.0,1.0,1.0)*0.99,refl: Refl::Spec)},// mirr
+		Sphere { rad:1e4,
+				 p:Vec3::new(50.0, -30.0, 300.0)+Vec3::new(-f64::sin(50.0*PI/180.0),0.0,f64::cos(50.0*PI/180.0))*1e4,
+				 e:Vec3::zero(),
+				 c:Vec3::new(1.0,1.0,1.0)*0.99,refl: Refl::Spec},// mirr L
+		Sphere { rad:1e4,
+				 p:Vec3::new(50.0, -30.0, 300.0)+Vec3::new(f64::sin(50.0*PI/180.0),0.0,f64::cos(50.0*PI/180.0))*1e4,
+				 e:Vec3::zero(),
+				 c:Vec3::new(1.0,1.0,1.0)*0.99,refl: Refl::Spec},// mirr R
+		Sphere { rad:1e4,
+				 p:Vec3::new(50.0, -30.0, -50.0)+Vec3::new(-f64::sin(30.0*PI/180.0),0.0,-f64::cos(30.0*PI/180.0))*1e4,
+				 e:Vec3::zero(),
+				 c:Vec3::new(1.0,1.0,1.0)*0.99,refl: Refl::Spec},// mirr FL
+		Sphere { rad:1e4,
+				 p:Vec3::new(50.0, -30.0, -50.0)+Vec3::new(f64::sin(30.0*PI/180.0),0.0,-f64::cos(30.0*PI/180.0))*1e4,
+				 e:Vec3::zero(),
+				 c:Vec3::new(1.0,1.0,1.0)*0.99,refl: Refl::Spec},// mirr
 
 
-  Sphere { rad:4, Vec3::new(50,6*0.6,47),   Vec3::zero(),Vec3::new(0.13,0.066,0.033), refl: Refl::Diff},//"tree"
-  Sphere { rad:16,Vec3::new(50,6*2+16*0.6,47),   Vec3::zero(), tc,  refl: Refl::Diff},//"tree"
-  Sphere { rad:11,Vec3::new(50,6*2+16*0.6*2+11*0.6,47),   Vec3::zero(), tc,  refl: Refl::Diff},//"tree"
-  Sphere { rad:7, Vec3::new(50,6*2+16*0.6*2+11*0.6*2+7*0.6,47),   Vec3::zero(), tc,  refl: Refl::Diff},//"tree"
+  Sphere { rad:4.0, p:Vec3::new(50.0,6.0*0.6,47.0),                                   e:Vec3::zero(), c:Vec3::new(0.13,0.066,0.033), refl: Refl::Diff},//"tree"
+  Sphere { rad:16.0,p:Vec3::new(50.0,6.0*2.0+16.0*0.6,47.0),                          e:Vec3::zero(), c:tc,  refl: Refl::Diff},//"tree"
+  Sphere { rad:11.0,p:Vec3::new(50.0,6.0*2.0+16.0*0.6*2.0+11.0*0.6,47.0),             e:Vec3::zero(), c:tc,  refl: Refl::Diff},//"tree"
+  Sphere { rad:7.0 ,p:Vec3::new(50.0,6.0*2.0+16.0*0.6*2.0+11.0*0.6*2.0+7.0*0.6,47.0), e:Vec3::zero(), c:tc,  refl: Refl::Diff},//"tree"
 
-  Sphere { rad:15.5,Vec3::new(50,1.8+6*2+16*0.6,47),   Vec3::zero(), scc,  refl: Refl::Diff},//"tree"
-  Sphere { rad:10.5,Vec3::new(50,1.8+6*2+16*0.6*2+11*0.6,47),   Vec3::zero(), scc,  refl: Refl::Diff},//"tree"
-  Sphere { rad:6.5, Vec3::new(50,1.8+6*2+16*0.6*2+11*0.6*2+7*0.6,47),   Vec3::zero(), scc,  refl: Refl::Diff},//"tree"
+  Sphere { rad:15.5,p:Vec3::new(50.0,1.8+6.0*2.0+16.0*0.6,47.0),   e:Vec3::zero(), c:scc,  refl: Refl::Diff},//"tree"
+  Sphere { rad:10.5,p:Vec3::new(50.0,1.8+6.0*2.0+16.0*0.6*2.0+11.0*0.6,47.0),   e:Vec3::zero(), c:scc,  refl: Refl::Diff},//"tree"
+  Sphere { rad:6.5, p:Vec3::new(50.0,1.8+6.0*2.0+16.0*0.6*2.0+11.0*0.6*2.0+7.0*0.6,47.0),   e:Vec3::zero(), c:scc,  refl: Refl::Diff},//"tree"
+	];
+}
+
 
