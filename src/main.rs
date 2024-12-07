@@ -127,15 +127,15 @@ impl Sphere {
 
 lazy_static! {
     static ref SPHERES: [Sphere; 9] = [
-        Sphere { rad: 1e5,   p: Vec3::new(1e5 + 1.0,      40.8, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.25, 0.25), refl: Refl::Diff },
-        Sphere { rad: 1e5,   p: Vec3::new(-1e5 + 99.0,    40.8, 81.6),e: Vec3::zero(),                c: Vec3::new(0.25, 0.25, 0.75), refl: Refl::Diff },
-        Sphere { rad: 1e5,   p: Vec3::new(50.0,           40.8, 1e5), e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },
-        Sphere { rad: 1e5,   p: Vec3::new(50.0,           40.8,-1e5 + 170.0),e: Vec3::zero(),         c: Vec3::zero(), refl: Refl::Diff },
-        Sphere { rad: 1e5,   p: Vec3::new(50.0,            1e5, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },
-        Sphere { rad: 1e5,   p: Vec3::new(50.0,-1e5 + 81.6+1.0, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },
+        Sphere { rad: 1e5,   p: Vec3::new( 1e5 + 1.0,      40.8, 81.6),e: Vec3::zero(),               c: Vec3::new(0.75, 0.25, 0.25), refl: Refl::Diff },//left
+        Sphere { rad: 1e5,   p: Vec3::new(-1e5 + 99.0,    40.8, 81.6),e: Vec3::zero(),                c: Vec3::new(0.25, 0.25, 0.75), refl: Refl::Diff },//right
+        Sphere { rad: 1e5,   p: Vec3::new(50.0,            40.8, 1e5),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },//front
+        Sphere { rad: 1e5,   p: Vec3::new(50.0,    40.8,-1e5 + 170.0),e: Vec3::zero(),                c: Vec3::zero(), refl: Refl::Diff },//back
+        Sphere { rad: 1e5,   p: Vec3::new(50.0,            1e5, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },//bottom
+        Sphere { rad: 1e5,   p: Vec3::new(50.0,-1e5 + 81.6+4.0, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },//top
         Sphere { rad: 16.5,  p: Vec3::new(27.0,           16.5, 47.0),e: Vec3::zero(),                c: Vec3::new(1.0, 1.0, 1.0) * 0.999, refl: Refl::Spec },
         Sphere { rad: 16.5,  p: Vec3::new(73.0,           16.5, 78.0),e: Vec3::zero(),                c: Vec3::new(1.0, 1.0, 1.0) * 0.999, refl: Refl::Refr },
-        Sphere { rad: 600.0, p: Vec3::new(50.0, 681.6-0.27+1.0, 81.6),e: Vec3::new(12.0, 12.0, 12.0), c: Vec3::zero(), refl: Refl::Diff },
+        Sphere { rad: 600.0, p: Vec3::new(50.0, 681.6-0.27+4.0, 81.6),e: Vec3::new(12.0, 12.0, 12.0), c: Vec3::zero(), refl: Refl::Diff },
 	];
 }
 
@@ -154,18 +154,35 @@ fn to_int(x: f64) -> u8 {
     (clamp(x).powf(1.0 / 2.2) * 255.0 + 0.5) as u8
 }
 
-fn save_ppm_file(filename: &str, image: Vec<Color>, width: usize, height: usize) {
-    let mut f = fs::File::create(filename).unwrap();
-    writeln!(f, "P3\n{} {}\n{}", width, height, 255).unwrap();
-    for i in 0..(width * (height)) {
-        write!(f, "{} {} {} ", to_int(image[i as usize].x), to_int(image[i as usize].y), to_int(image[i as usize].z)).unwrap();
-    }
-}
+//fn save_ppm_file(filename: &str, image: Vec<Color>, width: usize, height: usize) {
+//    let mut f = fs::File::create(filename).unwrap();
+//    writeln!(f, "P3\n{} {}\n{}", width, height, 255).unwrap();
+//    for i in 0..(width * (height)) {
+//        write!(f, "{} {} {} ", to_int(image[i as usize].x), to_int(image[i as usize].y), to_int(image[i as usize].z)).unwrap();
+//    }
+//}
 
+fn save_png_file(filename:&str, out_image: Vec<Color>, width: usize, height: usize) {
+
+// Create a new ImgBuf with width: imgx and height: imgy
+let mut imgbuf = image::ImageBuffer::new(width as u32, height as u32);
+
+// Iterate over the coordinates and pixels of the image
+	for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
+		let i:usize=(x as usize)+(y as usize)*width;
+		let r = to_int(out_image[i].x );
+        let g = to_int(out_image[i].y);
+        let b = to_int(out_image[i].z );
+		*pixel = image::Rgb([r, g, b]);
+	}
+
+// Save the image t is deduced from the path
+	imgbuf.save(filename).unwrap();
+}
 
 fn intersect(r: &Ray, t: &mut f64, id: &mut usize) -> bool {
     let n = SPHERES.len();
-    *t = INF;
+    *t = INF+20.0;
     for i in (0..n).rev() {
         let d = SPHERES[i].intersect(r);
         if d < *t {
@@ -284,5 +301,6 @@ fn main() {
         }
     });
 
-    save_ppm_file("image.ppm", image, w, h);
+//    save_ppm_file("image.ppm", image, w, h);
+    save_png_file("image.png", image, w, h);
 }
