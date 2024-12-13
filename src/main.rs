@@ -99,31 +99,34 @@ struct Sphere {
     refl: Refl,
 }
 
-type Color = Vec3;
-
-
 
 impl Sphere {
-    fn intersect(&self, r: &Ray) -> f64 {
-        let op = self.p - r.o;
-        let b = op.dot(&r.d);
-        let mut det = b * b - op.dot(&op) + self.rad * self.rad;
-        if det < 0.0 {
-            return INF;
+        pub fn intersect(&self, ray: &Ray) -> Option<f64> {
+        let po = self.p - ray.o;
+        let b = po.dot(&ray.d);
+        let d4 = b * b - po.dot(&po) + self.rad * self.rad;
+
+        if d4 < 0.0 {
+            return None;
         }
-        det = det.sqrt();
-        let t = b - det;
-        if t > EPS {
-            return t;
+
+        let sqrt_d4 = d4.sqrt();
+        let t1 = b - sqrt_d4;
+        let t2 = b + sqrt_d4;
+
+        if t1 < EPS && t2 < EPS {
+            return None;
         }
-        let t = b + det;
-        if t > EPS {
-            return t;
+
+        if t1 > EPS {
+            return Some(t1);
         } else {
-            return INF;
+            return Some(t2);
         }
-    }
+     }
+
 }
+
 
 lazy_static! {
     static ref SPHERES: [Sphere; 9] = [
@@ -138,6 +141,10 @@ lazy_static! {
         Sphere { rad: 600.0, p: Vec3::new(50.0, 681.6-0.27+4.0, 81.6),e: Vec3::new(12.0, 12.0, 12.0), c: Vec3::zero(), refl: Refl::Diff },
 	];
 }
+
+
+type Color = Vec3;
+
 
 fn clamp(x: f64) -> f64 {
     if x < 0.0 {
@@ -154,13 +161,14 @@ fn to_int(x: f64) -> u8 {
     (clamp(x).powf(1.0 / 2.2) * 255.0 + 0.5) as u8
 }
 
-//fn save_ppm_file(filename: &str, image: Vec<Color>, width: usize, height: usize) {
-//    let mut f = fs::File::create(filename).unwrap();
-//    writeln!(f, "P3\n{} {}\n{}", width, height, 255).unwrap();
-//    for i in 0..(width * (height)) {
-//        write!(f, "{} {} {} ", to_int(image[i as usize].x), to_int(image[i as usize].y), to_int(image[i as usize].z)).unwrap();
-//    }
-//}
+#[allow(dead_code)]
+fn save_ppm_file(filename: &str, image: Vec<Color>, width: usize, height: usize) {
+    let mut f = fs::File::create(filename).unwrap();
+    writeln!(f, "P3\n{} {}\n{}", width, height, 255).unwrap();
+    for i in 0..(width * (height)) {
+        write!(f, "{} {} {} ", to_int(image[i as usize].x), to_int(image[i as usize].y), to_int(image[i as usize].z)).unwrap();
+    }
+}
 
 fn save_png_file(filename:&str, out_image: Vec<Color>, width: usize, height: usize) {
 
@@ -181,17 +189,21 @@ let mut imgbuf = image::ImageBuffer::new(width as u32, height as u32);
 }
 
 fn intersect(r: &Ray, t: &mut f64, id: &mut usize) -> bool {
-    let n = SPHERES.len();
-    *t = INF+20.0;
-    for i in (0..n).rev() {
-        let d = SPHERES[i].intersect(r);
-        if d < *t {
-            *t = d;
-            *id = i;
+    *t=INF;
+    for i in 0..SPHERES.len() {
+        match SPHERES[i].intersect(r) {
+            Some(d)=>{
+                if d < *t {
+                    *t=d;
+                    *id=i;
+                }
+            },
+            None=>{},
         }
     }
     return *t < INF;
 }
+
 
 fn radiance(r: &Ray, depth: u8) -> Vec3 {
     let mut t: f64 = 0.0;
