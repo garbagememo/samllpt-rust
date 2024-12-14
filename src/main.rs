@@ -128,21 +128,6 @@ impl Sphere {
 }
 
 
-lazy_static! {
-    static ref SPHERES: [Sphere; 9] = [
-        Sphere { rad: 1e5,   p: Vec3::new( 1e5 + 1.0,      40.8, 81.6),e: Vec3::zero(),               c: Vec3::new(0.75, 0.25, 0.25), refl: Refl::Diff },//left
-        Sphere { rad: 1e5,   p: Vec3::new(-1e5 + 99.0,    40.8, 81.6),e: Vec3::zero(),                c: Vec3::new(0.25, 0.25, 0.75), refl: Refl::Diff },//right
-        Sphere { rad: 1e5,   p: Vec3::new(50.0,            40.8, 1e5),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },//front
-        Sphere { rad: 1e5,   p: Vec3::new(50.0,    40.8,-1e5 + 170.0),e: Vec3::zero(),                c: Vec3::zero(), refl: Refl::Diff },//back
-        Sphere { rad: 1e5,   p: Vec3::new(50.0,            1e5, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },//bottom
-        Sphere { rad: 1e5,   p: Vec3::new(50.0,-1e5 + 81.6+4.0, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },//top
-        Sphere { rad: 16.5,  p: Vec3::new(27.0,           16.5, 47.0),e: Vec3::zero(),                c: Vec3::new(1.0, 1.0, 1.0) * 0.999, refl: Refl::Spec },
-        Sphere { rad: 16.5,  p: Vec3::new(73.0,           16.5, 78.0),e: Vec3::zero(),                c: Vec3::new(1.0, 1.0, 1.0) * 0.999, refl: Refl::Refr },
-        Sphere { rad: 600.0, p: Vec3::new(50.0, 681.6-0.27+4.0, 81.6),e: Vec3::new(12.0, 12.0, 12.0), c: Vec3::zero(), refl: Refl::Diff },
-	];
-}
-
-
 type Color = Vec3;
 
 
@@ -188,31 +173,50 @@ let mut imgbuf = image::ImageBuffer::new(width as u32, height as u32);
 	imgbuf.save(filename).unwrap();
 }
 
-fn intersect(r: &Ray, t: &mut f64, id: &mut usize) -> bool {
-    *t=INF;
+
+lazy_static! {
+    static ref SPHERES: [Sphere; 9] = [
+        Sphere { rad: 1e5,   p: Vec3::new( 1e5 + 1.0,      40.8, 81.6),e: Vec3::zero(),               c: Vec3::new(0.75, 0.25, 0.25), refl: Refl::Diff },//left
+        Sphere { rad: 1e5,   p: Vec3::new(-1e5 + 99.0,    40.8, 81.6),e: Vec3::zero(),                c: Vec3::new(0.25, 0.25, 0.75), refl: Refl::Diff },//right
+        Sphere { rad: 1e5,   p: Vec3::new(50.0,            40.8, 1e5),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },//front
+        Sphere { rad: 1e5,   p: Vec3::new(50.0,    40.8,-1e5 + 170.0),e: Vec3::zero(),                c: Vec3::zero(), refl: Refl::Diff },//back
+        Sphere { rad: 1e5,   p: Vec3::new(50.0,            1e5, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },//bottom
+        Sphere { rad: 1e5,   p: Vec3::new(50.0,-1e5 + 81.6+4.0, 81.6),e: Vec3::zero(),                c: Vec3::new(0.75, 0.75, 0.75), refl: Refl::Diff },//top
+        Sphere { rad: 16.5,  p: Vec3::new(27.0,           16.5, 47.0),e: Vec3::zero(),                c: Vec3::new(1.0, 1.0, 1.0) * 0.999, refl: Refl::Spec },
+        Sphere { rad: 16.5,  p: Vec3::new(73.0,           16.5, 78.0),e: Vec3::zero(),                c: Vec3::new(1.0, 1.0, 1.0) * 0.999, refl: Refl::Refr },
+        Sphere { rad: 600.0, p: Vec3::new(50.0, 681.6-0.27+4.0, 81.6),e: Vec3::new(12.0, 12.0, 12.0), c: Vec3::zero(), refl: Refl::Diff },
+	];
+}
+
+struct InterStruct{
+    b:bool,
+    t:f64,
+    id:usize,
+}
+
+fn intersect(r: &Ray) -> InterStruct {
+    let mut ir=InterStruct{b:false,t:INF,id:0};
     for i in 0..SPHERES.len() {
         match SPHERES[i].intersect(r) {
             Some(d)=>{
-                if d < *t {
-                    *t=d;
-                    *id=i;
+                if d < ir.t {
+                    ir.t=d;
+                    ir.id=i;
                 }
             },
             None=>{},
         }
     }
-    return *t < INF;
+    ir.b=ir.t < INF;
+    return ir;
 }
 
 
 fn radiance(r: &Ray, depth: u8) -> Vec3 {
-    let mut t: f64 = 0.0;
-    let mut id = 0;
-    if !intersect(r, &mut t, &mut id) {
-        return Vec3::zero();
-    }
-    let obj = &SPHERES[id];
-    let x = r.o + r.d * t;
+    let ir=intersect(r);
+    if ir.b==false { return Vec3::zero(); }
+    let obj = &SPHERES[ir.id];
+    let x = r.o + r.d * ir.t;
     let n = (x - obj.p).norm();
     let nl = if n.dot(&r.d) < 0.0 { n } else { n * -1.0 };
     let mut f = obj.c;
